@@ -1,50 +1,56 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Filtered Taxi Trips Map</title>
+    <title>Taxi Trips Map</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
     <style>
-        #map { height: 100vh; }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
+    <div id="map"></div>
 
-<div id="map"></div>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-<script>
-    var map = L.map('map').setView([41.15, -8.61], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18
-    }).addTo(map);
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([41.1579, -8.6291], 12); // Centered on Porto, Portugal
 
-    var allTrips = [];
-    var tripLayer = L.geoJSON(null, {
-        style: { color: 'blue', weight: 2 },
-        onEachFeature: function (feature, layer) {
-            var props = feature.properties;
-                           "<b>Taxi ID:</b> " + props.taxi_id + "<br>" +
-                "<b>Trip ID:</b> " + props.trip_id + "<br>" +
-                "<b>Avg Speed:</b> " + props.avg_speed
-            );
-        }
-    }).addTo(map);
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-    function loadGeoJSON() {
-        fetch("https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/refs/heads/master/trips.json")
+        // Load GeoJSON data from GitHub
+        fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/refs/heads/master/trips.json')
             .then(response => response.json())
             .then(data => {
-                allTrips = data.features;
-                tripLayer.addData(allTrips);
+                L.geoJSON(data, {
+                    style: function (feature) {
+                        return { color: 'blue', weight: 2 };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties) {
+                            var popupContent = "<strong>Taxi ID:</strong> " + feature.properties.taxi_id +
+                                               "<br><strong>Trip ID:</strong> " + feature.properties.trip_id +
+                                               "<br><strong>Avg Speed:</strong> " + feature.properties.avg_speed + " km/h";
+                            layer.bindPopup(popupContent);
+                        }
+                    }
+                }).addTo(map);
             })
-            .catch(error => console.error("Error loading GeoJSON:", error));
-    }
-
-    loadGeoJSON();
-</script>
-
+            .catch(error => console.error('Error loading GeoJSON:', error));
+    </script>
 </body>
 </html>
