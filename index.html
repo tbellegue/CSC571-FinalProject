@@ -1,110 +1,119 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Taxi Trips Map</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Trips Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-    <style>
-        #map {
-            height: calc(100vh - 200px); 
-            width: 100%;
-        }
-    
-    #chart-container {
-        height: 200px;
-        width: 100%;
-        padding: 10px;
-        box-sizing: border-box;
-        background: #f9f9f9;
-        border-top: 1px solid #ccc
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    }
-    #scatterChart {
-        width: 100% !important;
-        height: 100% !important;
-    }
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
 
-    </style>
+        #map {
+            height: 70vh;
+            width: 100%;
+        }
+
+        #chart-container {
+            height: 30vh;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            background: #f9f9f9;
+            border-top: 1px solid #ccc;
+        }
+
+        #scatterChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
 </head>
 <body>
-    <div id="map"></div>
-<div id="chart-container">
-    <canvas id="scatterChart"></canvas>
-</div>
+    <div id="map"></div>
+    <div id="chart-container">
+        <canvas id="scatterChart"></canvas>
+    </div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var map = L.map('map').setView([41.1579, -8.6291], 12);
 
-    <script>
-        var map = L.map('map').setView([41.1579, -8.6291], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+        fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/trips.json')
+            .then(response => response.json())
+            .then(data => {
+                const scatterData = [];
 
-        fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/refs/heads/master/trips.json')
-            .then(response => response.json())
-            .then(data => {
-                const scatterData = [];
+                L.geoJSON(data, {
+                    style: function (feature) {
+                        return { color: 'blue', weight: 2 };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        const props = feature.properties;
+                        if (props) {
+                            const popupContent = "<strong>Taxi ID:</strong> " + props.taxi_id +
+                                                 "<br><strong>Trip ID:</strong> " + props.trip_id +
+                                                 "<br><strong>Avg Speed:</strong> " + props.avg_speed + " km/h";
+                            layer.bindPopup(popupContent);
 
-                L.geoJSON(data, {
-                    style: function (feature) {
-                        return { color: 'blue', weight: 2 };
-                    },
-                    onEachFeature: function (feature, layer) {
-                        if (feature.properties) {
-                            const props = feature.properties;
-                            const popupContent = "<strong>Taxi ID:</strong> " + props.taxiid +
-                                                 "<br><strong>Trip ID:</strong> " + props.tripid +
-                                                 "<br><strong>Avg Speed:</strong> " + props.avspeed + " km/h";
-                            layer.bindPopup(popupContent);
+                            const speed = parseFloat(props.avg_speed);
+                            const duration = parseFloat(props.duration);
+                            if (!isNaN(speed) && !isNaN(duration) && speed <= 300) {
+                                scatterData.push({ x: duration, y: speed });
+                            }
+                        }
+                    }
+                }).addTo(map);
 
-                            if (props.avspeed && props.duration) {
-                                scatterData.push({ x: props.duration, y: props.avspeed });
-                            }
-                        }
-                    }
-                }).addTo(map);
-
-                // Create scatter plot
-                new Chart(document.getElementById('scatterChart'), {
-                    type: 'scatter',
-                    data: {
-                        datasets: [{
-                            label: 'Avg Speed vs Trip Duration',
-                            data: scatterData,
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            pointRadius: 4
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Trip Duration (seconds)'
-                                }
-                            },
-                            y: {
-                                title: {
-                                    display: true,
-                                    text: 'Average Speed (km/h)'
-                                } 
-                            }
-                        }
-                    }
-                });
-            })
-            .catch(error => console.error('Error loading GeoJSON:', error));
-    </script>
+                // Create scatter plot
+                new Chart(document.getElementById('scatterChart'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Avg Speed vs Trip Duration',
+                            data: scatterData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Trip Duration (seconds)'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Average Speed (km/h)'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error loading GeoJSON:', error));
+    </script>
 </body>
 </html>
