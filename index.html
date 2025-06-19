@@ -17,7 +17,7 @@
 
 <script>
     var map = L.map('map').setView([41.15, -8.61], 12);
-   }.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18
     }).addTo(map);
 
@@ -26,11 +26,12 @@
         style: { color: 'blue', weight: 2 },
         onEachFeature: function (feature, layer) {
             var props = feature.properties;
-            layer.bindPopup(
-                "<b>Taxi ID:</b> " + props.taxi_id + "<br>" +
+                           "<b>Taxi ID:</b> " + props.taxi_id + "<br>" +
                 "<b>Trip ID:</b> " + props.trip_id + "<br>" +
                 "<b>Avg Speed:</b> " + props.avg_speed
-           addTo(map);
+            );
+        }
+    }).addTo(map);
 
     function loadGeoJSON() {
         fetch("https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/refs/heads/master/trips.json")
