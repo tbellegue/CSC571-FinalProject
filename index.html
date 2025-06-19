@@ -13,10 +13,16 @@
             height: 60vh;
             width: 100%;
         }
-        #chart-container {
-            width: 90%;
-            margin: 20px auto;
-        }
+    #chart-container {
+        width: 90%;
+        height: 400px; /* You can change this */
+        margin: 20px auto;
+    }
+    #scatterChart {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
     </style>
 </head>
 <body>
@@ -86,7 +92,8 @@
                                 title: {
                                     display: true,
                                     text: 'Average Speed (km/h)'
-                                }
+                                },
+                                   max: 300  
                             }
                         }
                     }
