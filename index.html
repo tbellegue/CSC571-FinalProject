@@ -67,12 +67,12 @@
                     onEachFeature: function (feature, layer) {
                         const props = feature.properties;
                         if (props) {
-                            const popupContent = "<strong>Taxi ID:</strong> " + props.taxi_id +
-                                                 "<br><strong>Trip ID:</strong> " + props.trip_id +
-                                                 "<br><strong>Avg Speed:</strong> " + props.avg_speed + " km/h";
+                            const popupContent = "<strong>Taxi ID:</strong> " + props.taxiid +
+                                                 "<br><strong>Trip ID:</strong> " + props.tripid +
+                                                 "<br><strong>Avg Speed:</strong> " + props.avspeed + " km/h";
                             layer.bindPopup(popupContent);
 
-                            const speed = parseFloat(props.avg_speed);
+                            const speed = parseFloat(props.avspeed);
                             const duration = parseFloat(props.duration);
                             if (!isNaN(speed) && !isNaN(duration)) {
                                 scatterData.push({ x: duration, y: speed });
