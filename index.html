@@ -10,7 +10,7 @@
 
     <style>
         #map {
-            height: 60vh;
+            height: calc(100vh - 200px); 
             width: 100%;
         }
     
@@ -32,9 +32,10 @@
 </head>
 <body>
     <div id="map"></div>
-    <div id="chart-container">
-        <canvas id="scatterChart"></canvas>
-    </div>
+<div id="chart-container">
+    <canvas id="scatterChart"></canvas>
+</div>
+
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
