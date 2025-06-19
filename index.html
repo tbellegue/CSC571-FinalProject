@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,44 +10,87 @@
 
     <style>
         #map {
-            height: 100vh;
+            height: 60vh;
             width: 100%;
+        }
+        #chart-container {
+            width: 90%;
+            margin: 20px auto;
         }
     </style>
 </head>
 <body>
     <div id="map"></div>
+    <div id="chart-container">
+        <canvas id="scatterChart"></canvas>
+    </div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // Initialize the map
-        var map = L.map('map').setView([41.1579, -8.6291], 12); // Centered on Porto, Portugal
+        var map = L.map('map').setView([41.1579, -8.6291], 12);
 
-        // Add OpenStreetMap tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Load GeoJSON data from GitHub
         fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/refs/heads/master/trips.json')
             .then(response => response.json())
             .then(data => {
+                const scatterData = [];
+
                 L.geoJSON(data, {
                     style: function (feature) {
                         return { color: 'blue', weight: 2 };
                     },
                     onEachFeature: function (feature, layer) {
                         if (feature.properties) {
-                            var popupContent = "<strong>Taxi ID:</strong> " + feature.properties.taxi_id +
-                                               "<br><strong>Trip ID:</strong> " + feature.properties.trip_id +
-                                               "<br><strong>Avg Speed:</strong> " + feature.properties.avg_speed + " km/h";
+                            const props = feature.properties;
+                            const popupContent = "<strong>Taxi ID:</strong> " + props.taxi_id +
+                                                 "<br><strong>Trip ID:</strong> " + props.trip_id +
+                                                 "<br><strong>Avg Speed:</strong> " + props.avg_speed + " km/h";
                             layer.bindPopup(popupContent);
+
+                            if (props.avg_speed && props.duration) {
+                                scatterData.push({ x: props.duration, y: props.avg_speed });
+                            }
                         }
                     }
                 }).addTo(map);
+
+                // Create scatter plot
+                new Chart(document.getElementById('scatterChart'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Avg Speed vs Trip Duration',
+                            data: scatterData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Trip Duration (seconds)'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Average Speed (km/h)'
+                                }
+                            }
+                        }
+                    }
+                });
             })
             .catch(error => console.error('Error loading GeoJSON:', error));
     </script>
