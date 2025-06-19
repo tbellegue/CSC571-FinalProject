@@ -50,13 +50,13 @@
                     onEachFeature: function (feature, layer) {
                         if (feature.properties) {
                             const props = feature.properties;
-                            const popupContent = "<strong>Taxi ID:</strong> " + props.taxi_id +
-                                                 "<br><strong>Trip ID:</strong> " + props.trip_id +
-                                                 "<br><strong>Avg Speed:</strong> " + props.avg_speed + " km/h";
+                            const popupContent = "<strong>Taxi ID:</strong> " + props.taxiid +
+                                                 "<br><strong>Trip ID:</strong> " + props.tripid +
+                                                 "<br><strong>Avg Speed:</strong> " + props.avspeed + " km/h";
                             layer.bindPopup(popupContent);
 
-                            if (props.avg_speed && props.duration) {
-                                scatterData.push({ x: props.duration, y: props.avg_speed });
+                            if (props.avspeed && props.duration) {
+                                scatterData.push({ x: props.duration, y: props.avspeed });
                             }
                         }
                     }
