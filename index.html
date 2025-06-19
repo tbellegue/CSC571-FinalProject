@@ -1,48 +1,48 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Filtered Taxi Trips Map</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <title>Filtered Taxi Trips Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <style>
-        #map { height: 100vh; }
-    </style>
+    <style>
+        #map { height: 100vh; }
+    </style>
 </head>
 <body>
 
 <div id="map"></div>
 
 <script>
-    var map = L.map('map').setView([41.15, -8.61], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18
-    }).addTo(map);
+    var map = L.map('map').setView([41.15, -8.61], 12);
+   }.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18
+    }).addTo(map);
 
-    var allTrips = [];
-    var tripLayer = L.geoJSON(null, {
-        style: { color: 'blue', weight: 2 },
-        onEachFeature: function (feature, layer) {
-            var props = feature.properties;
-           .trip_id + "<br>" +
-                "<b>Avg Speed:</b> " + props.avg_speed
-            );
-        }
-    }).addTo(map);
+    var allTrips = [];
+    var tripLayer = L.geoJSON(null, {
+        style: { color: 'blue', weight: 2 },
+        onEachFeature: function (feature, layer) {
+            var props = feature.properties;
+            layer.bindPopup(
+                "<b>Taxi ID:</b> " + props.taxi_id + "<br>" +
+                "<b>Trip ID:</b> " + props.trip_id + "<br>" +
+                "<b>Avg Speed:</b> " + props.avg_speed
+           addTo(map);
 
-    function loadGeoJSON() {
-        fetch("https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/refs/heads/master/trips.json")
-            .then(response => response.json())
-            .then(data => {
-                allTrips = data.features;
-                tripLayer.addData(allTrips);
-            });
-    }
+    function loadGeoJSON() {
+        fetch("https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/refs/heads/master/trips.json")
+            .then(response => response.json())
+            .then(data => {
+                allTrips = data.features;
+                tripLayer.addData(allTrips);
+            })
+            .catch(error => console.error("Error loading GeoJSON:", error));
+    }
 
-    loadGeoJSON();
+    loadGeoJSON();
 </script>
 
 </body>
