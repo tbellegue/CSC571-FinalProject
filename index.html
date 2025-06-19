@@ -1,76 +1,48 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Filtered Taxi Trips Map</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <title>Filtered Taxi Trips Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <style>
-        #map { height: 90vh; }
-    </style>
+    <style>
+        #map { height: 100vh; }
+    </style>
 </head>
 <body>
-
-<div class="controls">
-    <label for="taxiId">Taxi ID:</label>
-    <input type="text" id="taxiId" placeholder="Enter Taxi ID" />
-    <label for="minSpeed">Min Avg Speed:</label>
-    <input type="number" id="minSpeed" placeholder="Min Speed" />
-    <label for="maxSpeed">Max Avg Speed:</label>
-    <input type="number" id="maxSpeed" placeholder="Max Speed" />
-    <button onclick="applyFilters()">Apply Filters</button>
-</div>
 
 <div id="map"></div>
 
 <script>
-    var map = L.map('map').setView([41.15, -8.61], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18
-    }).addTo(map);
+    var map = L.map('map').setView([41.15, -8.61], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18
+    }).addTo(map);
 
-    var allTrips = [];
-    var tripLayer = L.geoJSON(null, {
-        style: { color: 'blue', weight: 2 },
-        onEachFeature: function (feature, layer) {
-            var props = feature.properties;
-            layer.bindPopup(
-                "<b>Taxi ID:</b> " + props.taxi_id + "<br>" +
-                "<b>Trip ID:</b> " + props.trip_id + "<br>" +
-                "<b>Avg Speed:</b> " + props.avg_speed
-            );
-        }
-    }).addTo(map);
+    var allTrips = [];
+    var tripLayer = L.geoJSON(null, {
+        style: { color: 'blue', weight: 2 },
+        onEachFeature: function (feature, layer) {
+            var props = feature.properties;
+           .trip_id + "<br>" +
+                "<b>Avg Speed:</b> " + props.avg_speed
+            );
+        }
+    }).addTo(map);
 
-    function loadGeoJSON() {
-        fetch("https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/refs/heads/master/trips.json")
-            .then(response => response.json())
-            .then(data => {
-                allTrips = data.features;
-                tripLayer.addData(allTrips);
-            });
-    }
+    function loadGeoJSON() {
+        fetch("https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/refs/heads/master/trips.json")
+            .then(response => response.json())
+            .then(data => {
+                allTrips = data.features;
+                tripLayer.addData(allTrips);
+            });
+    }
 
-    function applyFilters() {
-        var taxiId = document.getElementById("taxiId").value.trim();
-        var minSpeed = parseFloat(document.getElementById("minSpeed").value);
-        var maxSpeed = parseFloat(document.getElementById("maxSpeed").value);
-
-        var filtered = allTrips.filter(f => {
-            var matchTaxi = taxiId === "" || f.properties.taxi_id === taxiId;
-            var speed = parseFloat(f.properties.avg_speed);
-            var matchSpeed = (!isNaN(minSpeed) ? speed >= minSpeed : true) &&
-                             (!isNaN(maxSpeed) ? speed <= maxSpeed : true);
-            return matchTaxi && matchSpeed;
-        });
-
-        tripLayer.clearLayers();
-        tripLayer.addData(filtered);
-    }
-
-    loadGeoJSON();
+    loadGeoJSON();
 </script>
 
 </body>
