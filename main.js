@@ -73,7 +73,7 @@ function showPickupHeatmap(trips) {
     const coords = trips
         .map(f => f.geometry && f.geometry.coordinates && f.geometry.coordinates[0])
         .filter(c => Array.isArray(c) && c.length === 2)
-        .map(c => [c[1], c[0]]); // [lat, lng]
+        .map(c => [c[1], c[0]]);
     pickupHeatLayer = createHeatLayer(coords).addTo(map);
 }
 
@@ -87,7 +87,7 @@ function showDropoffHeatmap(trips) {
     const coords = trips
         .map(f => f.geometry && f.geometry.coordinates && f.geometry.coordinates.slice(-1)[0])
         .filter(c => Array.isArray(c) && c.length === 2)
-        .map(c => [c[1], c[0]]); // [lat, lng]
+        .map(c => [c[1], c[0]]);
     dropoffHeatLayer = createHeatLayer(coords).addTo(map);
 }
 
@@ -152,6 +152,8 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
             updateMapForHour(hour);
             if (window.filterScatterByHour) window.filterScatterByHour(hour);
             if (window.filterBarByHour) window.filterBarByHour(hour);
+            if (window.filterLineByHour) window.filterLineByHour(hour);
+            if (window.filterHistogramByHour) window.filterHistogramByHour(hour);
         });
 
         // Play/Pause animation
@@ -165,6 +167,8 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                 updateMapForHour(hour);
                 if (window.filterScatterByHour) window.filterScatterByHour(hour);
                 if (window.filterBarByHour) window.filterBarByHour(hour);
+                if (window.filterLineByHour) window.filterLineByHour(hour);
+                if (window.filterHistogramByHour) window.filterHistogramByHour(hour);
             }, 800);
         });
         document.getElementById('pause-slider').addEventListener('click', function() {
@@ -254,6 +258,11 @@ window.filterMapByDuration = function(minSec, maxSec) {
     }
 };
 
+// (Optional) Filter map by hour for line chart interaction
+window.filterMapByHour = function(hour) {
+    window.updateMapForHour(hour);
+};
+
 // Clear Filters button logic
 document.getElementById('clearFilters').addEventListener('click', function () {
     document.getElementById('time-slider').value = 0;
@@ -277,5 +286,6 @@ document.getElementById('clearFilters').addEventListener('click', function () {
     if (window.clearScatterHighlight) window.clearScatterHighlight();
     if (window.clearBarHighlight) window.clearBarHighlight();
     if (window.clearHistogramHighlight) window.clearHistogramHighlight();
+    if (window.clearLineHighlight) window.clearLineHighlight();
     hideHeatmap();
 });

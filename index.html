@@ -20,64 +20,57 @@
         #time-slider-container {
             margin: 10px;
         }
-        #map {
-            height: 500px;
-            width: 100%;
+        #heatmap-controls {
+            margin: 10px;
+        }
+        #chart-controls {
+            margin: 10px;
         }
         .chart-container {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
             background: #fff;
-            padding: 16px 32px 24px 32px;
-            margin-bottom: 24px;
-            box-sizing: border-box;
-            width: 100%;
-            max-width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(106,27,154,0.08);
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 900px;
+            position: relative;
         }
         .chart-title {
-            font-size: 1.3em;
+            font-size: 20px;
             font-weight: bold;
             margin-bottom: 10px;
-            text-align: center;
         }
-        #scatter, #bar {
-            width: 100%;
-            height: 400px;
-        }
-        .info.legend {
-            background: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            line-height: 1.2;
-        }
-        .d3-tooltip {
+        .toggle-chart {
             position: absolute;
-            background: #fff;
-            border: 1px solid #999;
-            padding: 6px 10px;
+            top: 10px;
+            right: 10px;
+            background: #6a1b9a;
+            color: #fff;
+            border: none;
             border-radius: 4px;
-            pointer-events: none;
-            font-size: 13px;
-            color: #222;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            opacity: 0;
-            z-index: 10;
-        }
-        #time-slider {
-            width: 300px;
-            vertical-align: middle;
-        }
-        #play-slider, #pause-slider {
-            margin-left: 8px;
             padding: 2px 10px;
             font-size: 14px;
+            cursor: pointer;
+        }
+        .hidden-chart > .chart-title,
+        .hidden-chart > div:not(.toggle-chart) {
+            display: none !important;
         }
     </style>
 </head>
 <body>
+    <div id="dashboard-description"
+        style="max-width:900px;margin:24px auto 0 auto;padding:18px 24px 12px 24px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(106,27,154,0.08);font-size:16px;line-height:1.6;">
+        This interactive dashboard visualizes taxi trips in a region of Spain. It includes:
+        a map with a heatmap of pickup and drop-off density;
+        a scatterplot of trip duration vs. speed;
+        a bar chart of the top 20 taxis by trip count;
+        a line chart of trips by hour;
+        a histogram of trip durations;
+        all charts are interconnected and respond to filters at the top. A time slider lets you explore data by hour or play
+        through the day (note: no date distinction). You can show/hide individual charts or all at once. A "Clear Filters"
+        button resets everything to default.
+    </div>
     <div id="controls">
         <button id="clearFilters">Clear Filters</button>
     </div>
@@ -88,38 +81,67 @@
         <button id="play-slider">Play</button>
         <button id="pause-slider">Pause</button>
     </div>
-    <div id="heatmap-controls" style="margin:10px;">
+    <div id="heatmap-controls">
         <button id="show-pickup-heat">Show Pickup Density</button>
         <button id="show-dropoff-heat">Show Dropoff Density</button>
         <button id="hide-heat">Hide Heatmap</button>
     </div>
-    <div class="chart-container">
-        <div class="chart-title">Taxi Trips Map</div>
-        <div id="map"></div>
+    <div id="chart-controls">
+        <button id="show-all-charts">Show All Charts</button>
+        <button id="hide-all-charts">Hide All Charts</button>
     </div>
 
-    <div class="chart-container">
+    <div class="chart-container" id="map-container">
+        <button class="toggle-chart" data-target="map-container">Show/Hide</button>
+        <div class="chart-title">Taxi Trips Map</div>
+        <div id="map" style="height: 400px;"></div>
+    </div>
+
+    <div class="chart-container" id="scatter-container">
+        <button class="toggle-chart" data-target="scatter-container">Show/Hide</button>
         <div class="chart-title">Trip Duration vs. Average Speed</div>
         <div id="scatter"></div>
     </div>
-    <div class="chart-container">
+    <div class="chart-container" id="bar-container">
+        <button class="toggle-chart" data-target="bar-container">Show/Hide</button>
         <div class="chart-title">Top 20 Taxis by Trip Count</div>
         <div id="bar"></div>
     </div>
-    <div class="chart-container">
+    <div class="chart-container" id="line-container">
+        <button class="toggle-chart" data-target="line-container">Show/Hide</button>
         <div class="chart-title">Trips by Hour of Day</div>
         <div id="line"></div>
     </div>
-    <div class="chart-container">
+    <div class="chart-container" id="histogram-container">
+        <button class="toggle-chart" data-target="histogram-container">Show/Hide</button>
         <div class="chart-title">Trip Duration Distribution</div>
         <div id="histogram"></div>
     </div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>    <script src="main.js"></script>
-    <script src="scatter.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="main.js"></script>
     <script src="bar.js"></script>
+    <script src="scatter.js"></script>
     <script src="line.js"></script>
     <script src="histogram.js"></script>
+    <script>
+    // Chart show/hide logic
+    document.querySelectorAll('.toggle-chart').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const container = document.getElementById(this.dataset.target);
+        if (container) {
+          container.classList.toggle('hidden-chart');
+        }
+      });
+    });
+
+    document.getElementById('show-all-charts').onclick = function() {
+      document.querySelectorAll('.chart-container').forEach(div => div.classList.remove('hidden-chart'));
+    };
+    document.getElementById('hide-all-charts').onclick = function() {
+      document.querySelectorAll('.chart-container').forEach(div => div.classList.add('hidden-chart'));
+    };
+    </script>
 </body>
 </html>
