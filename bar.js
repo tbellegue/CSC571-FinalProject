@@ -3,7 +3,8 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
     .then(data => {
         window.rawTrips = data.features;
 
-        function drawBarChart(trips) {
+        function drawBarChart(trips, selectedTaxiId = null) {
+            console.log("drawBarChart called, trips:", trips.length, "selectedTaxiId:", selectedTaxiId);
             d3.select("#bar").selectAll("*").remove();
 
             // Count trips per taxi
@@ -71,11 +72,10 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                 .attr("y", d => y(d.count))
                 .attr("width", x.bandwidth())
                 .attr("height", d => height - y(d.count))
-                .attr("fill", "#6a1b9a")
+                .attr("fill", d => selectedTaxiId === d.taxiid ? "#e040fb" : "#6a1b9a")
                 .style("cursor", "pointer")
                 .on("mouseover", function (event, d) {
                     d3.select(this).attr("fill", "#e040fb");
-                    // Tooltip
                     let tooltip = d3.select("body").select(".d3-tooltip");
                     if (tooltip.empty()) {
                         tooltip = d3.select("body")
@@ -95,18 +95,18 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                         .style("left", (event.pageX + 12) + "px")
                         .style("top", (event.pageY - 28) + "px");
                 })
-                .on("mouseout", function () {
-                    d3.select(this).attr("fill", d => window.barChartSelectedTaxi === d.taxiid ? "#e040fb" : "#6a1b9a");
+                .on("mouseout", function (event, d) {
+                    d3.select(this).attr("fill", selectedTaxiId === d.taxiid ? "#e040fb" : "#6a1b9a");
                     d3.select("body").select(".d3-tooltip").transition().duration(150).style("opacity", 0);
                 })
                 .on("click", function (event, d) {
                     if (window.barChartSelectedTaxi === d.taxiid) {
                         window.barChartSelectedTaxi = null;
-                        svg.selectAll(".bar").attr("fill", "#6a1b9a");
+                        drawBarChart(trips, null);
                         if (window.clearMapAndScatterForBar) window.clearMapAndScatterForBar();
                     } else {
                         window.barChartSelectedTaxi = d.taxiid;
-                        svg.selectAll(".bar").attr("fill", b => b.taxiid === d.taxiid ? "#e040fb" : "#6a1b9a");
+                        drawBarChart(trips, d.taxiid);
                         if (window.filterMapAndScatterByTaxi) window.filterMapAndScatterByTaxi(d.taxiid);
                     }
                 });
@@ -148,7 +148,8 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
         };
 
         window.clearBarHighlight = function () {
+            console.log("clearBarHighlight called, trips:", window.rawTrips ? window.rawTrips.length : "undefined");
             window.barChartSelectedTaxi = null;
-            d3.selectAll(".bar").attr("fill", "#6a1b9a");
+            drawBarChart(window.rawTrips);
         };
     });

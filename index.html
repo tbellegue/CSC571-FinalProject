@@ -14,16 +14,7 @@
             height: 100%;
             background: #faf7fc;
         }
-        #controls {
-            margin: 10px;
-        }
-        #time-slider-container {
-            margin: 10px;
-        }
-        #heatmap-controls {
-            margin: 10px;
-        }
-        #chart-controls {
+        #controls, #time-slider-container, #heatmap-controls, #chart-controls {
             margin: 10px;
         }
         .chart-container {
@@ -52,24 +43,36 @@
             font-size: 14px;
             cursor: pointer;
         }
-        .hidden-chart > .chart-title,
-        .hidden-chart > div:not(.toggle-chart) {
+        /* Only hide chart content, never tooltips */
+        .hidden-chart .chart-title,
+        .hidden-chart > #map,
+        .hidden-chart > #bar,
+        .hidden-chart > #scatter,
+        .hidden-chart > #line,
+        .hidden-chart > #histogram {
             display: none !important;
+        }
+        /* Tooltip styling, always visible when opacity > 0 */
+        .d3-tooltip {
+            pointer-events: none;
+            position: absolute;
+            background: #fff;
+            border: 1px solid #6a1b9a;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #311b92;
+            box-shadow: 0 2px 8px rgba(106,27,154,0.08);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.15s;
         }
     </style>
 </head>
 <body>
     <div id="dashboard-description"
         style="max-width:900px;margin:24px auto 0 auto;padding:18px 24px 12px 24px;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(106,27,154,0.08);font-size:16px;line-height:1.6;">
-        This interactive dashboard visualizes taxi trips in a region of Spain. It includes:
-        a map with a heatmap of pickup and drop-off density;
-        a scatterplot of trip duration vs. speed;
-        a bar chart of the top 20 taxis by trip count;
-        a line chart of trips by hour;
-        a histogram of trip durations;
-        all charts are interconnected and respond to filters at the top. A time slider lets you explore data by hour or play
-        through the day (note: no date distinction). You can show/hide individual charts or all at once. A "Clear Filters"
-        button resets everything to default.
+        The map represents taxi trips in a region of Spain. There are four additional charts as you scroll down the page. All charts are interactive with each other and the filters at the top. A scatterplot that shows the distribution of trip duration vs. speed, a bar chart that shows the top 20 taxis by trip count, a line chart that shows trips by hour of day and a histogram that shows the distribution of trip duration. At the top of the page there is a clear filters button to reset each chart to its default state. There is a time slider that you can control and look at each hour, or you can press play and watch the data points change through out each hour of a day (note: this slider by hour by only, it does not distinguish date). There is a heatmap that will show the density of pick up and drop off areas. You have the ability to hide or show each chart or hide all or show all charts.
     </div>
     <div id="controls">
         <button id="clearFilters">Clear Filters</button>
@@ -96,7 +99,6 @@
         <div class="chart-title">Taxi Trips Map</div>
         <div id="map" style="height: 400px;"></div>
     </div>
-
     <div class="chart-container" id="scatter-container">
         <button class="toggle-chart" data-target="scatter-container">Show/Hide</button>
         <div class="chart-title">Trip Duration vs. Average Speed</div>
@@ -143,5 +145,9 @@
       document.querySelectorAll('.chart-container').forEach(div => div.classList.add('hidden-chart'));
     };
     </script>
+    <footer
+        style="max-width:900px;margin:40px auto 0 auto;padding:12px 0 24px 0;text-align:center;color:#6a1b9a;font-size:15px;">
+        &copy; 2025 Taylor Bellegue
+    </footer>
 </body>
 </html>

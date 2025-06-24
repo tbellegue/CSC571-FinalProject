@@ -3,7 +3,8 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
     .then(data => {
         window.lineTrips = data.features;
 
-        function drawLineChart(trips) {
+        function drawLineChart(trips, selectedHour = null) {
+            console.log("drawLineChart called, trips:", trips.length, "selectedHour:", selectedHour);
             d3.select("#line").selectAll("*").remove();
 
             // Count trips by hour
@@ -62,9 +63,6 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                 .attr("class", "d3-tooltip")
                 .style("opacity", 0);
 
-            // State for selected hour
-            let selectedHour = null;
-
             // Points
             svg.selectAll("circle")
                 .data(hourCounts)
@@ -97,16 +95,14 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                 })
                 .on("click", function (event, d) {
                     if (selectedHour === d.hour) {
-                        selectedHour = null;
-                        svg.selectAll("circle").attr("fill", "#311b92");
+                        drawLineChart(trips, null);
                         if (window.clearBarHighlight) window.clearBarHighlight();
                         if (window.clearScatterHighlight) window.clearScatterHighlight();
                         if (window.clearHistogramHighlight) window.clearHistogramHighlight();
                         if (window.clearLineHighlight) window.clearLineHighlight();
                         if (window.clearMapAndScatterForBar) window.clearMapAndScatterForBar();
                     } else {
-                        selectedHour = d.hour;
-                        svg.selectAll("circle").attr("fill", c => c.hour === d.hour ? "#e040fb" : "#311b92");
+                        drawLineChart(trips, d.hour);
                         if (window.filterBarByHour) window.filterBarByHour(d.hour);
                         if (window.filterScatterByHour) window.filterScatterByHour(d.hour);
                         if (window.filterHistogramByHour) window.filterHistogramByHour(d.hour);
@@ -151,6 +147,7 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
         };
 
         window.clearLineHighlight = function () {
-            d3.select("#line").selectAll("circle").attr("fill", "#311b92");
+            console.log("clearLineHighlight called, trips:", window.lineTrips ? window.lineTrips.length : "undefined");
+            drawLineChart(window.lineTrips);
         };
     });
