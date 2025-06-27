@@ -32,8 +32,7 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                 .range([0, width]);
 
             const y = d3.scaleLinear()
-                .domain([0, d3.max(hourCounts, d => d.count)])
-                .nice()
+                .domain([0, 400])
                 .range([height, 0]);
 
             // X axis
