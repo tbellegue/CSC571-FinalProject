@@ -93,11 +93,19 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                         if (window.clearHistogramHighlight) window.clearHistogramHighlight();
                         if (window.clearLineHighlight) window.clearLineHighlight();
                         if (window.clearMapAndScatterForBar) window.clearMapAndScatterForBar();
+                        if (window.filterLineByTaxi) window.filterLineByTaxi(null);
+                        if (window.filterHistogramByTaxi) window.filterHistogramByTaxi(null);
+                        if (window.filterMapByTripId) window.filterMapByTripId(null);
+                        if (window.filterBarByTaxi) window.filterBarByTaxi(null);
                     } else {
                         selectedTrip = d.tripid;
                         svg.selectAll("circle").attr("fill", p => p.tripid === d.tripid ? "#e040fb" : "#6a1b9a");
                         if (window.highlightMapByTripId) window.highlightMapByTripId(d.tripid);
                         if (window.highlightBarByTripId) window.highlightBarByTripId(d.tripid);
+                        if (window.filterLineByTaxi) window.filterLineByTaxi(d.taxiid);
+                        if (window.filterHistogramByTaxi) window.filterHistogramByTaxi(d.taxiid);
+                        if (window.filterMapByTripId) window.filterMapByTripId(d.tripid);
+                        if (window.filterBarByTaxi) window.filterBarByTaxi(d.taxiid);
                     }
                 });
 

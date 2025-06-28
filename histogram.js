@@ -54,25 +54,25 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                 .attr("fill", d => selectedBin === d ? "#e040fb" : "#6a1b9a")
                 .attr("opacity", 0.85)
                 .style("cursor", "pointer")
-                .on("mouseover", function(event, d) {
+                .on("mouseover", function (event, d) {
                     tooltip.transition().duration(150).style("opacity", 1);
                     tooltip.html(
                         `<strong>Duration:</strong> ${d.x0.toFixed(1)}–${d.x1.toFixed(1)} min<br/>
                          <strong>Trips:</strong> ${d.length}`
                     )
-                    .style("left", (event.pageX + 12) + "px")
-                    .style("top", (event.pageY - 28) + "px");
+                        .style("left", (event.pageX + 12) + "px")
+                        .style("top", (event.pageY - 28) + "px");
                     d3.select(this).attr("fill", "#e040fb");
                 })
-                .on("mousemove", function(event) {
+                .on("mousemove", function (event) {
                     tooltip.style("left", (event.pageX + 12) + "px")
                         .style("top", (event.pageY - 28) + "px");
                 })
-                .on("mouseout", function(event, d) {
+                .on("mouseout", function (event, d) {
                     tooltip.transition().duration(150).style("opacity", 0);
                     d3.select(this).attr("fill", selectedBin === d ? "#e040fb" : "#6a1b9a");
                 })
-                .on("click", function(event, d) {
+                .on("click", function (event, d) {
                     if (selectedBin === d) {
                         selectedBin = null;
                         svg.selectAll("rect").attr("fill", "#6a1b9a");
@@ -116,7 +116,7 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
         drawHistogram(window.histogramTrips);
 
         // Filtering functions for cross-chart interaction
-        window.filterHistogramByHour = function(hour) {
+        window.filterHistogramByHour = function (hour) {
             const filtered = window.histogramTrips.filter(f => {
                 if (!f.properties.starttime) return false;
                 return new Date(f.properties.starttime).getHours() === hour;
@@ -124,7 +124,13 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
             drawHistogram(filtered);
         };
 
-        window.clearHistogramHighlight = function() {
+        // Add filterHistogramByTaxi for bar chart interaction
+        window.filterHistogramByTaxi = function (taxiid) {
+            const filtered = window.histogramTrips.filter(f => f.properties.taxiid === taxiid);
+            drawHistogram(filtered);
+        };
+
+        window.clearHistogramHighlight = function () {
             drawHistogram(window.histogramTrips);
         };
 

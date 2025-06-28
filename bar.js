@@ -104,10 +104,14 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                         window.barChartSelectedTaxi = null;
                         drawBarChart(trips, null);
                         if (window.clearMapAndScatterForBar) window.clearMapAndScatterForBar();
+                        if (window.filterLineByTaxi) window.filterLineByTaxi(null);
+                        if (window.filterHistogramByTaxi) window.filterHistogramByTaxi(null);
                     } else {
                         window.barChartSelectedTaxi = d.taxiid;
                         drawBarChart(trips, d.taxiid);
                         if (window.filterMapAndScatterByTaxi) window.filterMapAndScatterByTaxi(d.taxiid);
+                        if (window.filterLineByTaxi) window.filterLineByTaxi(d.taxiid);
+                        if (window.filterHistogramByTaxi) window.filterHistogramByTaxi(d.taxiid);
                     }
                 });
 

@@ -145,8 +145,15 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
             drawLineChart(filteredTrips);
         };
 
+        // Add filterLineByTaxi for bar chart interaction
+        window.filterLineByTaxi = function (taxiid) {
+            const filteredTrips = window.lineTrips.filter(f => f.properties.taxiid === taxiid);
+            drawLineChart(filteredTrips);
+        };
+
         window.clearLineHighlight = function () {
-            console.log("clearLineHighlight called, trips:", window.lineTrips ? window.lineTrips.length : "undefined");
+            // Hide any lingering tooltip
+            d3.selectAll('.d3-tooltip').transition().duration(150).style('opacity', 0);
             drawLineChart(window.lineTrips);
         };
     });

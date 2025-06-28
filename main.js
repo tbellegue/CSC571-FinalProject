@@ -10,7 +10,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 function getColorFactory(minFreq, maxFreq) {
-    return function(freq) {
+    return function (freq) {
         const t = (freq - minFreq) / (maxFreq - minFreq);
         return d3.interpolateRgb("#e040fb", "#311b92")(t);
     };
@@ -28,19 +28,50 @@ function onEachFeatureFactory(getColor) {
                 "<br><strong>Frequency:</strong> " + freq;
             layer.bindPopup(popupContent);
 
+            // --- D3-style tooltip ---
+            // Ensure tooltip div exists
+            let tooltip = d3.select('body').select('.d3-tooltip-map');
+            if (tooltip.empty()) {
+                tooltip = d3.select('body')
+                    .append('div')
+                    .attr('class', 'd3-tooltip d3-tooltip-map')
+                    .style('opacity', 0);
+            }
+            layer.on('mouseover', function (e) {
+                tooltip.transition().duration(150).style('opacity', 1);
+                tooltip.html(
+                    `<strong>Taxi ID:</strong> ${props.taxiid}<br/>` +
+                    `<strong>Trip ID:</strong> ${props.tripid}<br/>` +
+                    `<strong>Avg Speed:</strong> ${props.avspeed} km/h<br/>` +
+                    `<strong>Frequency:</strong> ${freq}`
+                )
+                    .style('left', (e.originalEvent.pageX + 12) + 'px')
+                    .style('top', (e.originalEvent.pageY - 28) + 'px');
+                layer.setStyle({ weight: 5, color: '#e040fb' });
+            });
+            layer.on('mousemove', function (e) {
+                tooltip.style('left', (e.originalEvent.pageX + 12) + 'px')
+                    .style('top', (e.originalEvent.pageY - 28) + 'px');
+            });
+            layer.on('mouseout', function () {
+                tooltip.transition().duration(150).style('opacity', 0);
+                layer.setStyle({ weight: 2, color: getColor(freq) });
+            });
+
+            // --- Interactivity: filter all charts on click ---
             layer.on('click', function () {
-                if (window.geoJsonLayer) map.removeLayer(window.geoJsonLayer);
-                window.geoJsonLayer = L.geoJSON({
-                    type: "FeatureCollection",
-                    features: [feature]
-                }, {
-                    style: function () { return { color: "#311b92", weight: 4, opacity: 1 }; },
-                    onEachFeature: onEachFeatureFactory(getColor)
-                }).addTo(map);
-                if (window.highlightScatterByTripId) {
-                    window.highlightScatterByTripId(props.tripid);
+                // Toggle filter by taxiid
+                if (window.barChartSelectedTaxi === props.taxiid) {
+                    window.barChartSelectedTaxi = null;
+                    if (window.clearMapAndScatterForBar) window.clearMapAndScatterForBar();
+                    if (window.filterLineByTaxi) window.filterLineByTaxi(null);
+                    if (window.filterHistogramByTaxi) window.filterHistogramByTaxi(null);
+                } else {
+                    window.barChartSelectedTaxi = props.taxiid;
+                    if (window.filterMapAndScatterByTaxi) window.filterMapAndScatterByTaxi(props.taxiid);
+                    if (window.filterLineByTaxi) window.filterLineByTaxi(props.taxiid);
+                    if (window.filterHistogramByTaxi) window.filterHistogramByTaxi(props.taxiid);
                 }
-                if (window.clearBarHighlight) window.clearBarHighlight();
                 layer.openPopup();
             });
         }
@@ -59,7 +90,7 @@ function createHeatLayer(coords) {
         radius: 18,
         blur: 22,
         maxZoom: 17,
-        gradient: {0.4: '#e040fb', 0.65: '#6a1b9a', 1: '#311b92'}
+        gradient: { 0.4: '#e040fb', 0.65: '#6a1b9a', 1: '#311b92' }
     });
 }
 
@@ -146,7 +177,7 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
         legend.addTo(map);
 
         // Slider event
-        document.getElementById('time-slider').addEventListener('input', function(e) {
+        document.getElementById('time-slider').addEventListener('input', function (e) {
             const hour = +e.target.value;
             document.getElementById('time-slider-value').textContent = hour;
             updateMapForHour(hour);
@@ -157,7 +188,7 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
         });
 
         // Play/Pause animation
-        document.getElementById('play-slider').addEventListener('click', function() {
+        document.getElementById('play-slider').addEventListener('click', function () {
             if (sliderInterval) return;
             let hour = +document.getElementById('time-slider').value;
             sliderInterval = setInterval(() => {
@@ -171,25 +202,25 @@ fetch('https://raw.githubusercontent.com/tbellegue/CSC571-FinalProject/master/tr
                 if (window.filterHistogramByHour) window.filterHistogramByHour(hour);
             }, 800);
         });
-        document.getElementById('pause-slider').addEventListener('click', function() {
+        document.getElementById('pause-slider').addEventListener('click', function () {
             clearInterval(sliderInterval);
             sliderInterval = null;
         });
 
         // Heatmap controls
-        document.getElementById('show-pickup-heat').onclick = function() {
+        document.getElementById('show-pickup-heat').onclick = function () {
             showPickupHeatmap(allTrips);
         };
-        document.getElementById('show-dropoff-heat').onclick = function() {
+        document.getElementById('show-dropoff-heat').onclick = function () {
             showDropoffHeatmap(allTrips);
         };
-        document.getElementById('hide-heat').onclick = function() {
+        document.getElementById('hide-heat').onclick = function () {
             hideHeatmap();
         };
     })
     .catch(error => console.error('Error loading GeoJSON:', error));
 
-window.updateMapForHour = function(hour) {
+window.updateMapForHour = function (hour) {
     if (window.geoJsonLayer) map.removeLayer(window.geoJsonLayer);
     const filtered = allTrips.filter(f => {
         if (!f.properties.starttime) return false;
@@ -209,7 +240,7 @@ window.updateMapForHour = function(hour) {
 };
 
 // Linked bar chart filter support
-window.filterMapAndScatterByTaxi = function(taxiid) {
+window.filterMapAndScatterByTaxi = function (taxiid) {
     if (window.geoJsonLayer && window.fullGeoJsonData) {
         map.removeLayer(window.geoJsonLayer);
         const filtered = window.fullGeoJsonData.features.filter(f => f.properties.taxiid === taxiid);
@@ -232,12 +263,12 @@ window.filterMapAndScatterByTaxi = function(taxiid) {
     if (window.filterScatterByTaxi) window.filterScatterByTaxi(taxiid);
 };
 
-window.clearMapAndScatterForBar = function() {
+window.clearMapAndScatterForBar = function () {
     document.getElementById('clearFilters').click();
 };
 
 // Histogram filter support
-window.filterMapByDuration = function(minSec, maxSec) {
+window.filterMapByDuration = function (minSec, maxSec) {
     if (window.geoJsonLayer && window.fullGeoJsonData) {
         map.removeLayer(window.geoJsonLayer);
         const filtered = window.fullGeoJsonData.features.filter(f => {
@@ -259,8 +290,27 @@ window.filterMapByDuration = function(minSec, maxSec) {
 };
 
 // (Optional) Filter map by hour for line chart interaction
-window.filterMapByHour = function(hour) {
+window.filterMapByHour = function (hour) {
     window.updateMapForHour(hour);
+};
+
+// Add a function to filter the map by trip ID
+window.filterMapByTripId = function (tripid) {
+    if (window.geoJsonLayer && window.fullGeoJsonData) {
+        map.removeLayer(window.geoJsonLayer);
+        const filtered = window.fullGeoJsonData.features.filter(f => f.properties.tripid === tripid);
+        const getColor = getColorFactory(0, 100);
+        window.geoJsonLayer = L.geoJSON({
+            type: "FeatureCollection",
+            features: filtered
+        }, {
+            style: function (feature) {
+                const freq = feature.properties.frequency || (parseInt(feature.properties.tripid, 10) % 100);
+                return { color: getColor(freq), weight: 4, opacity: 1 };
+            },
+            onEachFeature: onEachFeatureFactory(getColor)
+        }).addTo(map);
+    }
 };
 
 // Clear Filters button logic
